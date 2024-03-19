@@ -232,8 +232,10 @@ module preprocessor_types
         integer :: n_firepoints, n_firegenerators
         logical :: generate_fire 
         logical :: fire_generator_is_time_to_1054_kW
-        type(field_pointer), dimension(2,mxpts) :: firegenerators
-        real(eb), dimension(2, mxpts) :: firevals
+        type(field_pointer), dimension(8,mxpts) :: firegenerators
+        real(eb), dimension(8) :: firecols
+        integer :: idx_time = 1, idx_hrr = 2, idx_hieght = 3, idx_area = 4, idx_co = 5, idx_soot = 6, &
+            idx_hcn = 7, idx_trace = 8
         
     contains
         procedure :: do_rand => fire_do_rand
@@ -1199,6 +1201,7 @@ module preprocessor_types
             me%fire%flaming_transition_time = me%smolder_time_ptr%realval%val
         end if
         
+        ! Generate fire where all points are being generated
         if (me%generate_fire) then
             do i = 1, me%n_firepoints
                 call me%firegenerators(1,i)%do_rand(iteration)
