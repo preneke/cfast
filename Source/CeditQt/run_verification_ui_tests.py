@@ -750,6 +750,72 @@ def print_summary(
                 )
 
 
+def check_target_material_initialization():
+    """Regression for #2458: no demo or implicit default target material."""
+    from cfast_case import Target
+    from main_window import default_concrete_material, opening_case
+
+    window = CeditMainWindow()
+    tab = window.targets_tab
+    try:
+        assert not tab.targets
+        assert tab.material_combo.currentText() == "OFF"
+        assert tab.material_ids == ["OFF"]
+        assert tab.thickness_edit.text() == ""
+        assert tab.conductivity_label.text().strip() == "Conductivity:"
+
+        from dataclasses import replace
+        from units import CONDUCTIVITY, DENSITY, LENGTH, SPECIFIC_HEAT, format_value
+
+        material = replace(default_concrete_material(), id="NM 1", conductivity=0.16,
+                           specific_heat=0.9, density=790.0, thickness=0.016)
+        tab.set_material_ids([material.id])
+        tab.set_material_properties([material])
+        tab.material_combo.setCurrentText("NM 1")
+        assert not tab.targets
+        assert format_value(CONDUCTIVITY, material.conductivity, include_unit=False) in tab.conductivity_label.text()
+        assert format_value(SPECIFIC_HEAT, material.specific_heat, include_unit=False) in tab.specific_heat_label.text()
+        assert format_value(DENSITY, material.density, include_unit=False) in tab.density_label.text()
+        assert tab.thickness_edit.text() == format_value(LENGTH, material.thickness)
+        tab.set_material_properties([replace(material, thickness=0.02)])
+        assert tab.thickness_edit.text() == format_value(LENGTH, 0.02)
+        tab.add_target()
+        assert tab.targets[0].matl_id == "NM 1"
+        assert tab.effective_thickness(tab.targets[0]) == 0.02
+        window.load_case(opening_case())
+
+        tab.add_target()
+        assert tab.targets[0].matl_id == "OFF"
+        assert tab.summary_table.item(0, 9).text() == "OFF"
+        assert tab.material_combo.currentText() == "OFF"
+
+        case = opening_case()
+        case.materials = [default_concrete_material()]
+        case.targets = [Target(id="Target 1", comp_id="Comp 1", matl_id="CONCRETE")]
+        window.load_case(case)
+        assert tab.material_ids == ["OFF", "CONCRETE"]
+        assert tab.material_combo.currentText() == "CONCRETE"
+        assert tab.effective_thickness(tab.targets[0]) == 0.15
+        tab.add_target()
+        assert tab.targets[-1].matl_id == "CONCRETE"
+
+        window.load_case(case)
+        tab.remove_target()
+        assert tab.material_combo.currentText() == "OFF"
+        assert tab.thickness_edit.text() == ""
+        assert tab.density_label.text().strip() == "Density:"
+
+        window.load_case(opening_case())
+        assert tab.material_ids == ["OFF"]
+        assert tab.material_combo.currentText() == "OFF"
+        tab.add_target()
+        case = opening_case()
+        tab.add_to_case(case)
+        assert case.targets[0].matl_id == "OFF"
+    finally:
+        window.deleteLater()
+
+
 def main() -> int:
     args = parse_args()
     repo_root = args.repo_root.resolve() if args.repo_root else find_repo_root(Path(__file__))
@@ -757,6 +823,7 @@ def main() -> int:
 
     patch_message_boxes()
     app = QApplication.instance() or QApplication([])
+    check_target_material_initialization()
 
     if args.mode == "rewrite":
         if args.work_dir is None:
