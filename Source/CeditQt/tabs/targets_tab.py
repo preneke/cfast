@@ -6,6 +6,7 @@ from dataclasses import replace
 
 from PySide6.QtCore import QSignalBlocker, Qt
 from PySide6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QFrame,
     QGridLayout,
@@ -222,6 +223,9 @@ class TargetsTab(QWidget):
         self.material_combo.setEditable(True)
         self.material_combo.addItems(self.material_ids)
 
+        self.adiabatic_checkbox = QCheckBox("Adiabatic")
+        self.adiabatic_checkbox.setToolTip("Use the selected material’s emissivity for the adiabatic target.")
+
         self.conductivity_label = QLabel("Conductivity: ")
         self.specific_heat_label = QLabel("Specific Heat: ")
         self.density_label = QLabel("Density: ")
@@ -239,6 +243,12 @@ class TargetsTab(QWidget):
         layout.addWidget(self.temperature_depth_label, 5, 0, alignment=Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.temperature_depth_edit, 5, 1)
 
+        layout.setVerticalSpacing(12)
+        for row in (1, 2, 3):
+            layout.setRowMinimumHeight(row, 28)
+        layout.setRowMinimumHeight(6, 18)
+        layout.setRowStretch(6, 1)
+        layout.addWidget(self.adiabatic_checkbox, 7, 0, 1, 2)
         group.setLayout(layout)
         return group
 
@@ -327,9 +337,10 @@ class TargetsTab(QWidget):
             self.editor_group.setTitle("Target Geometry")
             for widget in self.editor_widgets():
                 widget.clear()
+            self.adiabatic_checkbox.setChecked(False)
             set_combo_text(self.material_combo, "OFF")
             self.thickness_edit.clear()
-            self.temperature_depth_label.clear()
+            self.temperature_depth_label.setText("Internal Temperature at (fraction):")
             self.conductivity_label.setText("Conductivity: ")
             self.specific_heat_label.setText("Specific Heat: ")
             self.density_label.setText("Density: ")
@@ -348,6 +359,7 @@ class TargetsTab(QWidget):
         self.nx_edit.setText(format_number(target.x_normal))
         self.ny_edit.setText(format_number(target.y_normal))
         self.nz_edit.setText(format_number(target.z_normal))
+        self.adiabatic_checkbox.setChecked(target.adiabatic)
         set_combo_text(self.material_combo, target.matl_id)
         self.temperature_depth_edit.setText(
             format_number(target.temperature_depth)
@@ -377,6 +389,7 @@ class TargetsTab(QWidget):
         for combo in self.editor_combos():
             combo.currentTextChanged.connect(self.editor_changed)
 
+        self.adiabatic_checkbox.toggled.connect(self.editor_changed)
         self.material_combo.currentTextChanged.connect(self.material_changed)
         self.editor_connections_ready = True
 
@@ -475,7 +488,7 @@ class TargetsTab(QWidget):
                 existing.surface_orientation if existing is not None else "USER SPECIFIED"
             ),
             surface_temperature=existing.surface_temperature if existing is not None else None,
-            adiabatic=existing.adiabatic if existing is not None else False,
+            adiabatic=self.adiabatic_checkbox.isChecked(),
             convection_coefficient_front=(
                 existing.convection_coefficient_front if existing is not None else 0.0
             ),
@@ -587,6 +600,7 @@ class TargetsTab(QWidget):
                 y_position=0.0,
                 z_position=0.0,
                 matl_id=self.material_combo.currentText().strip() or "OFF",
+                adiabatic=self.adiabatic_checkbox.isChecked(),
             )
         else:
             target = replace(base, id=f"Targ {next_number}")
@@ -638,6 +652,9 @@ class TargetsTab(QWidget):
         self.refresh_summary_table(select_row=min(self.current_index, len(self.targets) - 1))
 
     def add_to_case(self, case: CfastCase):
+        if not self.targets and self.adiabatic_checkbox.isChecked():
+            if self.material_combo.currentText().strip() not in {m.id for m in case.materials}:
+                raise ValueError("Adiabatic target: select a material defined in Thermal Properties for its emissivity.")
         if self.current_index >= 0:
             try:
                 self.targets[self.current_index] = self.target_from_editor()

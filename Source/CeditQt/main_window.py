@@ -10,6 +10,7 @@ import time
 from PySide6.QtCore import QProcess, QSettings, QTimer, Qt, QUrl, Signal
 from PySide6.QtGui import QAction, QDesktopServices, QFont, QFontDatabase, QPixmap
 from PySide6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -720,6 +721,8 @@ class CeditMainWindow(QMainWindow):
         """Recheck the assembled case after a user changes an editor field."""
         for widget in self.findChildren(QLineEdit):
             widget.textChanged.connect(self.schedule_live_validation)
+        for widget in self.findChildren(QCheckBox):
+            widget.toggled.connect(self.schedule_live_validation)
         for widget in self.findChildren(QComboBox):
             widget.currentTextChanged.connect(self.schedule_live_validation)
         for widget in self.findChildren(QTableWidget):

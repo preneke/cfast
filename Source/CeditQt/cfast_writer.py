@@ -379,6 +379,11 @@ def validate_case(case: CfastCase) -> None:
             raise ValueError(
                 f"Target {target.id!r}: compartment {target.comp_id!r} does not exist."
             )
+        if target.adiabatic and target.matl_id.strip() not in material_ids:
+            raise ValueError(
+                f"Adiabatic target {target.id!r}: select a material defined in "
+                "Thermal Properties for its emissivity."
+            )
         if not material_is_defined(target.matl_id):
             raise ValueError(
                 f"Target {target.id!r}: material {target.matl_id!r} is not "
