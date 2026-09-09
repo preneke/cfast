@@ -579,6 +579,8 @@ def write_cfast_input(case: CfastCase, path: str | Path) -> None:
             f"RELATIVE_HUMIDITY = {cfast_number(case.relative_humidity)}",
             f"INTERIOR_TEMPERATURE = {cfast_number(case.interior_temperature)}",
             f"EXTERIOR_TEMPERATURE = {cfast_number(case.exterior_temperature)}",
+            f"INTERIOR_O2_MASS_FRACTION = {cfast_number(case.interior_o2_mass_fraction)}",
+            f"EXTERIOR_O2_MASS_FRACTION = {cfast_number(case.exterior_o2_mass_fraction)}",
         ],
     )
 
@@ -659,7 +661,6 @@ def write_cfast_input(case: CfastCase, path: str | Path) -> None:
             f"HALL = {cfast_logical(compartment.hall)}",
             f"SHAFT = {cfast_logical(compartment.shaft)}",
             f"LEAK_AREA_RATIO = {cfast_vector((compartment.wall_leak_area_ratio, compartment.floor_leak_area_ratio))}",
-            f"LEAK_AREA = {cfast_vector((compartment.wall_leak_area, compartment.floor_leak_area))}",
             f"FLOW_COEFFICIENT = {cfast_number(compartment.flow_coefficient)}",
         ]
 
