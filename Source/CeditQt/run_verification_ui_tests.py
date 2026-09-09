@@ -760,6 +760,8 @@ def check_target_material_initialization():
     try:
         assert not tab.targets
         assert tab.material_combo.currentText() == "OFF"
+        assert tab.temperature_depth_label.text() == "Internal Temperature at (fraction):"
+        assert tab.temperature_depth_edit.text() == ""
         assert tab.material_ids == ["OFF"]
         assert tab.thickness_edit.text() == ""
         assert tab.conductivity_label.text().strip() == "Conductivity:"
@@ -804,6 +806,8 @@ def check_target_material_initialization():
         assert tab.material_combo.currentText() == "OFF"
         assert tab.thickness_edit.text() == ""
         assert tab.density_label.text().strip() == "Density:"
+        assert tab.temperature_depth_label.text() == "Internal Temperature at (fraction):"
+        assert tab.temperature_depth_edit.text() == ""
 
         window.load_case(opening_case())
         assert tab.material_ids == ["OFF"]
@@ -816,6 +820,62 @@ def check_target_material_initialization():
         window.deleteLater()
 
 
+def check_adiabatic_target():
+    from cfast_reader import read_cfast_input
+    from cfast_writer import write_cfast_input
+    from main_window import default_concrete_material, opening_case
+
+    window = CeditMainWindow()
+    tab = window.targets_tab
+    try:
+        tab.adiabatic_checkbox.setChecked(True)
+        assert window.live_validation_timer.isActive()
+        window.update_live_validation()
+        assert "Adiabatic target" in window.statusBar().currentMessage()
+        assert "#b00020" in window.statusBar().styleSheet()
+        tab.add_target()
+        assert tab.targets[0].adiabatic
+        window.update_live_validation()
+        assert "Adiabatic target" in window.statusBar().currentMessage()
+
+        material = default_concrete_material()
+        tab.set_material_ids([material.id])
+        tab.set_material_properties([material])
+        case = opening_case()
+        case.materials = [material]
+        case.targets = tab.targets
+        window.load_case(case)
+        tab.material_combo.setCurrentText(material.id)
+        window.update_live_validation()
+        assert window.statusBar().currentMessage() == "No Errors"
+        assert window.statusBar().styleSheet() == ""
+        case = window.build_cfast_case()
+        assert case.targets[0].adiabatic
+        assert case.targets[0].matl_id == material.id
+        with tempfile.TemporaryDirectory(prefix="cedit-adiabatic-") as directory:
+            path = Path(directory) / "target.in"
+            write_cfast_input(case, path)
+            loaded = read_cfast_input(path)
+            assert loaded.targets[0].adiabatic
+            assert loaded.targets[0].matl_id == material.id
+            assert loaded.materials[0].emissivity == material.emissivity
+            window.load_case(loaded)
+            assert tab.adiabatic_checkbox.isChecked()
+
+        for missing in ("OFF", "DEFAULT", "Missing", ""):
+            tab.material_combo.setCurrentText(missing)
+            window.update_live_validation()
+            assert "Adiabatic target" in window.statusBar().currentMessage()
+            assert "#b00020" in window.statusBar().styleSheet()
+        tab.material_combo.setCurrentText("OFF")
+        tab.adiabatic_checkbox.setChecked(False)
+        window.update_live_validation()
+        assert window.statusBar().currentMessage() == "No Errors"
+        assert not tab.targets[0].adiabatic
+    finally:
+        window.deleteLater()
+
+
 def main() -> int:
     args = parse_args()
     repo_root = args.repo_root.resolve() if args.repo_root else find_repo_root(Path(__file__))
@@ -824,6 +884,7 @@ def main() -> int:
     patch_message_boxes()
     app = QApplication.instance() or QApplication([])
     check_target_material_initialization()
+    check_adiabatic_target()
 
     if args.mode == "rewrite":
         if args.work_dir is None:
