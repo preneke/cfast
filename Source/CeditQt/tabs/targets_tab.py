@@ -84,7 +84,7 @@ class TargetsTab(QWidget):
         self.updating = False
         self.editor_connections_ready = False
         self.compartment_ids: list[str] = []
-        self.material_ids: list[str] = ["OFF", "DEFAULT"]
+        self.material_ids: list[str] = ["OFF"]
         self.materials_by_id: dict[str, MaterialProperty] = {}
 
         self.summary_table = HoverEditTableWidget(0, len(table_columns()))
@@ -129,7 +129,8 @@ class TargetsTab(QWidget):
         layout.addWidget(self.editor_group, 3)
         self.setLayout(layout)
 
-        self.load_demo_data()
+        self.refresh_summary_table()
+        self.connect_editor_signals_once()
 
     def load_case(self, case: CfastCase):
         self.refresh_unit_labels()
@@ -241,27 +242,6 @@ class TargetsTab(QWidget):
         group.setLayout(layout)
         return group
 
-    def load_demo_data(self):
-        self.targets = [
-            Target(
-                id="Targ 1",
-                comp_id="Comp 1",
-                x_position=2.2,
-                y_position=1.88,
-                z_position=2.34,
-                x_normal=0.0,
-                y_normal=0.0,
-                z_normal=1.0,
-                matl_id="CONCRETE",
-                target_type="PLATE",
-                thickness=0.15,
-                temperature_depth=0.075,
-                depth_units="DISTANCE",
-            )
-        ]
-
-        self.refresh_summary_table(select_row=0)
-
     def refresh_summary_table(self, select_row: int | None = None):
         self.updating = True
         self.summary_table.setRowCount(len(self.targets))
@@ -347,6 +327,12 @@ class TargetsTab(QWidget):
             self.editor_group.setTitle("Target Geometry")
             for widget in self.editor_widgets():
                 widget.clear()
+            set_combo_text(self.material_combo, "OFF")
+            self.thickness_edit.clear()
+            self.temperature_depth_label.clear()
+            self.conductivity_label.setText("Conductivity: ")
+            self.specific_heat_label.setText("Specific Heat: ")
+            self.density_label.setText("Density: ")
             self.updating = False
             return
 
@@ -374,7 +360,7 @@ class TargetsTab(QWidget):
             if target.depth_units.upper() == "FRACTION"
             else f"Internal Temperature at ({unit_label(LENGTH)}):"
         )
-        self.update_material_labels(target)
+        self.update_material_labels(target.matl_id)
 
         self.updating = False
 
@@ -413,7 +399,10 @@ class TargetsTab(QWidget):
         ]
 
     def material_changed(self):
-        if self.updating or self.current_index < 0:
+        if self.updating:
+            return
+        if self.current_index < 0:
+            self.preview_material()
             return
 
         target = self.targets[self.current_index]
@@ -435,7 +424,7 @@ class TargetsTab(QWidget):
             return
 
         self.targets[self.current_index] = target
-        self.update_material_labels(target)
+        self.update_material_labels(target.matl_id)
         self.refresh_summary_table(select_row=self.current_index)
 
     def commit_thickness(self):
@@ -454,7 +443,7 @@ class TargetsTab(QWidget):
         self.editor_changed()
 
     def target_from_editor(self) -> Target:
-        matl_id = self.material_combo.currentText().strip() or "DEFAULT"
+        matl_id = self.material_combo.currentText().strip() or "OFF"
         existing = self.targets[self.current_index] if 0 <= self.current_index < len(self.targets) else None
         displayed_thickness = parse_value(LENGTH, self.thickness_edit.text(), "Thickness")
         material_thickness = self.material_properties(matl_id).get("thickness", 0.0)
@@ -498,7 +487,7 @@ class TargetsTab(QWidget):
 
     def target_from_summary(self, row: int) -> Target:
         existing = self.targets[row]
-        matl_id = self.summary_text(row, 9) or existing.matl_id or "DEFAULT"
+        matl_id = self.summary_text(row, 9) or existing.matl_id or "OFF"
         thickness = existing.thickness
 
         return replace(
@@ -547,8 +536,8 @@ class TargetsTab(QWidget):
         item = self.summary_table.item(row, col)
         return "" if item is None else item.text().strip()
 
-    def update_material_labels(self, target: Target):
-        material = self.material_properties(target.matl_id)
+    def update_material_labels(self, matl_id: str):
+        material = self.material_properties(matl_id)
         self.conductivity_label.setText(
             f"Conductivity: {format_property(material.get('conductivity'), CONDUCTIVITY)} {unit_label(CONDUCTIVITY)}"
         )
@@ -558,6 +547,18 @@ class TargetsTab(QWidget):
         self.density_label.setText(
             f"Density: {format_property(material.get('density'), DENSITY)} {unit_label(DENSITY)}"
         )
+    def preview_material(self):
+        matl_id = self.material_combo.currentText().strip()
+        if matl_id.upper() not in self.materials_by_id:
+            self.conductivity_label.setText("Conductivity: ")
+            self.specific_heat_label.setText("Specific Heat: ")
+            self.density_label.setText("Density: ")
+            self.thickness_edit.clear()
+            return
+        self.update_material_labels(matl_id)
+        thickness = self.material_properties(matl_id)["thickness"]
+        self.thickness_edit.setText(format_value(LENGTH, thickness))
+
     def effective_thickness(self, target: Target) -> float:
         if target.thickness > 0.0:
             return target.thickness
@@ -585,7 +586,7 @@ class TargetsTab(QWidget):
                 x_position=0.0,
                 y_position=0.0,
                 z_position=0.0,
-                matl_id="DEFAULT",
+                matl_id=self.material_combo.currentText().strip() or "OFF",
             )
         else:
             target = replace(base, id=f"Targ {next_number}")
@@ -681,7 +682,7 @@ class TargetsTab(QWidget):
         return self.compartment_ids[0] if self.compartment_ids else ""
 
     def set_material_ids(self, material_ids: list[str]):
-        choices = ["OFF", "DEFAULT"]
+        choices = ["OFF"]
         for material_id in material_ids:
             if material_id and material_id not in choices:
                 choices.append(material_id)
@@ -702,6 +703,8 @@ class TargetsTab(QWidget):
         }
         if 0 <= self.current_index < len(self.targets):
             self.load_target_into_editor(self.targets[self.current_index])
+        else:
+            self.preview_material()
 
     def material_properties(self, matl_id: str) -> dict:
         material = self.materials_by_id.get(matl_id.strip().upper())
