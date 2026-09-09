@@ -39,15 +39,15 @@ The \ct{HEAD} line of the input file will contain the \textbf{Title} and a \ct{V
 
 Ambient conditions define the starting environment. The initial pressure profile is calculated using a lapse rate based on the NOAA/NASA tables~\cite{GPO:Atmosphere}. The specified ambient pressure is taken at relative height of zero. The temperature and pressure must then be measured at that position.  Another possible choice would be the pressure and temperature at sea level, with the structure elevations then given with respect to mean sea level.  This is also acceptable, but somewhat more tedious in specifying the construction of a structure.  Either of these choices works though, so long as they are consistent. Usually, the station elevation is set to zero and the pressure to ambient. The effect of changing these values is minor. Note that the equations implemented in the model are not designed to handle negative elevations and altitudes.
 \begin{description}
-\item[Interior Temperature] (default: 20 \degc; namelist: \ct{INTERIOR_TEMPERATURE}): Initial temperature inside the structure at the station elevation.
+\item[Interior Temperature] (default: 20~\unit{\degreeCelsius}; namelist: \ct{INTERIOR_TEMPERATURE}): Initial temperature inside the structure at the station elevation.
 
 \item[Humidity] (default: 50 \%; namelist: \ct{RELATIVE_HUMIDITY}): The initial relative humidity, only specified for the interior.  This is converted to kilograms of water per cubic meter as an initial condition for both the interior and exterior of the structure.
 
-\item[Exterior Temperature] (default: 20 \degc; namelist: \ct{EXTERIOR_TEMPERATURE}): Initial temperature outside the structure at the station elevation.
+\item[Exterior Temperature] (default: 20~\unit{\degreeCelsius}; namelist: \ct{EXTERIOR_TEMPERATURE}): Initial temperature outside the structure at the station elevation.
 
 \item[Pressure] (default: 101325 Pa; namelist: \ct{PRESSURE}): Initial pressure inside and outside the structure at the station elevation.
 
-\item[O$_2$ mass fraction] (default: 0.23 kg/kg; namelist: \ct{INTERIOR_O2_MASS_FRACTION} and \ct{EXTERIOR_O2_MASS_FRACTION}):
+\item[O$_2$ mass fraction] (default: 0.23~\unit{kg/kg}; namelist: \ct{INTERIOR_O2_MASS_FRACTION} and \ct{EXTERIOR_O2_MASS_FRACTION}):
 Initial values for ambient oxygen mass fraction inside and outside the structure. The default nitrogen mass fraction is one minus the default oxygen mass fraction.
 \end{description}
 
@@ -68,7 +68,7 @@ Keywords associated with global parameters are organized in the miscellaneous na
 
 \item[Overwrite] (default: True; namelist: \ct{OVERWRITE}) Controls whether existing output files may be overwritten.
 
-\item[Extinction Coefficient] (default: 8700 (flaming), 4400 m$^2$/kg (smoldering); namelist: \ct{SPECIFIC_EXTINCTION(2)}) Specific-extinction coefficients for flaming and smoldering combustion, respectively.
+\item[Extinction Coefficient] (default: 8700 (flaming), 4400 \unit{m^2/kg} (smoldering); namelist: \ct{SPECIFIC_EXTINCTION(2)}) Specific-extinction coefficients for flaming and smoldering combustion, respectively.
 \end{description}
 
 
@@ -76,6 +76,7 @@ Keywords associated with global parameters are organized in the miscellaneous na
 
 
 \chapter{Thermal Properties}
+\label{info:MATL}
 
 The thermophysical properties of materials used for compartment surfaces or targets are set in the Thermal Properties tab.
 
@@ -86,7 +87,7 @@ The thermophysical properties of materials used for compartment surfaces or targ
 \end{figure}
 
 \section{Adding Thermal Properties}
-\label{info:MATL}
+
 
 CFAST does not include predefined thermal properties for compartment materials. Thus, the user needs to define materials for use within a specific simulation. These may be taken from other simulations or entered directly from reference sources or test results. Clicking the \textbf{Add} button and assigning values to the following list of properties will create a set of thermal properties associated with a material used in a compartment or a target. The thermophysical properties are specified at one condition of temperature, humidity, etc.
 \begin{description}
@@ -94,11 +95,11 @@ CFAST does not include predefined thermal properties for compartment materials. 
 
 \item[ID] (namelist: \ct{ID}) A one-word (no more than 8 characters) {\it unique} identifier for the material.  This identifier should not contain any spaces and is used in other CFAST inputs to identify the particular material referenced.
 
-\item[Conductivity] (default units: kW/(m$\cdot$K); namelist: \ct{CONDUCTIVITY}) Thermal conductivity for the material. Note the units---this property is often listed in units of W/(m$\cdot$K).
+\item[Conductivity] (default units: \unit{kW/(m.K)}; namelist: \ct{CONDUCTIVITY}) Thermal conductivity for the material. Note the units---this property is often listed in units of W/(m$\cdot$K).
 
-\item[Specific Heat] (default units: kJ/(kg$\cdot$K); namelist: \ct{SPECIFIC_HEAT}) Specific heat for the material.
+\item[Specific Heat] (default units: \unit{kJ/(kg.K)}; namelist: \ct{SPECIFIC_HEAT}) Specific heat for the material.
 
-\item[Density] (default units: kg/m$^3$; namelist: \ct{DENSITY}) Density of the material.
+\item[Density] (default units: \unit{kg/m^3}; namelist: \ct{DENSITY}) Density of the material.
 
 \item[Thickness] (default units: m; namelist: \ct{THICKNESS}) Thickness of the material. A compartment surface may override this value; targets use the material value unless an alternative value is given.
 
@@ -195,7 +196,7 @@ To calculate heat loss through the ceiling, walls, and floor of a compartment, m
 The \textbf{Compartments} tab includes a table entitled \textbf{Variable Cross-sectional Area} for defining a compartment whose horizontal cross-sectional area is a function of height:
 \begin{description}
 \item[Height] (namelist: \ct{CROSS_SECT_HEIGHTS(:)}) Height (m) off the floor of the compartment.
-\item[Area] (namelist: \ct{CROSS_SECT_AREAS(:)}) Cross-sectional area (m$^2$) at the corresponding height.
+\item[Area] (namelist: \ct{CROSS_SECT_AREAS(:)}) Cross-sectional area (\unit{m^2}) at the corresponding height.
 \end{description}
 Cross-sectional area values should be input in order by ascending height. If the first height value is not zero (i.e., at floor level), the cross-sectional area is assumed constant from the floor to the height specified in the first cross-sectional area value. Similarly, if the last height value is not at the specified ceiling height, the cross-sectional area is assumed constant from the height specified in the last cross-sectional area value to the ceiling. Between any two adjacent cross-sectional area data values, the area is assumed to be a pyramidal section (which by definition maintains the same width to depth aspect ratio for the compartment from floor to ceiling).
 
@@ -221,7 +222,7 @@ For reference, the following table is taken from the \textit{Handbook of Smoke C
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{|l|c|c|}
 \hline
-Construction Element   & Leakage   & \shortstack{Leakage Area (m$^2$/m$^2$) \\ Leakage Area per Unit Wall Area}   \\ \hline
+Construction Element   & Leakage   & \shortstack{Leakage Area (\unit{m^2/m^2}) \\ Leakage Area per Unit Wall Area}   \\ \hline
 \multirow{4}{*}{\shortstack[l]{\textbf{Exterior building walls} \\ \\ {\small (includes construction cracks} \\ {\small and cracks around windows and doors)}}}             & Tight      & $5.0 \times 10^{-5}$ \\
 & Average    & $1.7 \times 10^{-4}$ \\
 & Loose      & $3.5 \times 10^{-4}$ \\
@@ -234,7 +235,7 @@ Construction Element   & Leakage   & \shortstack{Leakage Area (m$^2$/m$^2$) \\ L
 \multirow{3}{*}{\shortstack[l]{\textbf{Elevator shaft walls} \\ \\ {\small (includes construction cracks but} \\ {\small not cracks around doors)}}}                       & Tight      & $1.8 \times 10^{-4}$   \\
 & Average    & $8.4 \times 10^{-4}$ \\
 & Loose      & $1.8 \times 10^{-3}$ \\ \hline \hline
-Construction Element   & Leakage                        & \shortstack{Leakage Area (m$^2$/m$^2$) \\ Leakage Area per Unit Floor Area}   \\ \hline
+Construction Element   & Leakage                        & \shortstack{Leakage Area (\unit{m^2/m^2}) \\ Leakage Area per Unit Floor Area}   \\ \hline
 
 \multirow{3}{*}{\shortstack[l]{\textbf{Floors} \\ {\small (includes construction cracks and} \\ {\small gaps around penetrations)}}}                                    & Tight      & $6.6 \times 10^{-6}$   \\
 & Average    & $5.2 \times 10^{-5}$ \\
@@ -325,7 +326,7 @@ Examples of these openings are scuttles in a ship, or a hole in the roof of a re
 \item[Top Compartment] Compartment where the vent is in the floor.
 \item[Bottom Compartment] The adjacent compartment where the vent is in the ceiling.
 \label{Ceil Cross-sectional Area}
-\item[Cross-sectional Area] (default units: m$^2$, default value: 0 m$^2$)
+\item[Cross-sectional Area] (default units: \unit{m^2}, default value: 0~\unit{m^2})
 \label{Ceil Shape}
 \item[Shape] The shape factor changes the calculation of the effective diameter of the vent and flow coefficients for flow through the vent.
 \item[Vent Offset] (default units: m, default value: 0 m): For visualization only, the horizontal distances between the center of the vent and the origin of the X and Y axes in the upper compartment. See figure \ref{fig:compartment_positioning} for axis position conventions in CFAST.
@@ -375,11 +376,11 @@ CFAST models mechanical ventilation in terms of user-specified volume flows at v
 \item[ID]  The selected name must be unique (i.e., not the same as another mechanical ventilation system in the same simulation).
 \item[First Compartment] The compartment from which the fan flow originates.
 \item[Second Compartment] The compartment to which the fan flow terminates.
-\item[Area] (default units: m$^2$, default value: 0 m$^2$): Cross-sectional area of the opening.
+\item[Area] (default units: \unit{m^2}, default value: 0~\unit{m^2}): Cross-sectional area of the opening.
 \label{Mech Height}
-\item[Center Height] (default units: m, default value: 0 m): Height of the midpoint of the duct opening above the floor.
+\item[Center Height] (default units: \unit{m}, default value: 0~\unit{m}): Height of the midpoint of the duct opening above the floor.
 \item[Orientation] (default vertical) A horizontal diffuser implies vertical flow through the ceiling or floor of the compartment.  A vertical diffuser implies horizontal flow through a wall of the compartment.
-\item[Vent Offset] (default units: m, Default value: 0 m): For visualization only, the horizontal distances between the center of the vent and the origin of the X and Y axes in the first compartment. See figure \ref{fig:compartment_positioning} for axis position conventions in CFAST.
+\item[Vent Offset] (default units: \unit{m}, Default value: 0~\unit{m}): For visualization only, the horizontal distances between the center of the vent and the origin of the X and Y axes in the first compartment. See figure \ref{fig:compartment_positioning} for axis position conventions in CFAST.
 \end{description}
 
 Vents in CFAST can be opened or closed at user-specified times or by a user-specified target's surface temperature or incident heat flux. For time-based opening changes, the inputs are a series of time points and associated opening fractions from 0 (fully closed) to 1 (fully open).
@@ -409,11 +410,11 @@ For condition-based opening changes, the inputs specify an associated target, tr
 CFAST does not include provisions for reverse flow through a fan, or a fan curve. Rather, you may specify a pressure above which the flow linearly decreases to zero.
 \begin{description}
 \label{Mech Flow Rate}
-\item[Flow Rate] (default units: m$^3$/s, default value: 0 m$^3$/s): Constant flow rate of the fan.
+\item[Flow Rate] (default units: \unit{m^3/s}, default value: 0~\unit{m^3/s}): Constant flow rate of the fan.
 \label{Mech Begin Drop Off Pressure}
-\item[Begin Drop Off Pressure] (default units: Pa, default value: 200 Pa): Above this pressure, the flow begins a drop-off to zero. A hyperbolic tangent function is used to ensure a smooth transition from full flow at the ``Begin Drop Off Pressure'' to zero flow at the ``Zero Flow Pressure''.
+\item[Begin Drop Off Pressure] (default units: \unit{Pa}, default value: 200~\unit{Pa}): Above this pressure, the flow begins a drop-off to zero. A hyperbolic tangent function is used to ensure a smooth transition from full flow at the ``Begin Drop Off Pressure'' to zero flow at the ``Zero Flow Pressure''.
 \label{Mech Zero Flow Pressure}
-\item[Zero Flow Pressure] (default units: Pa, default value: 300 Pa): The pressure above which the flow is zero.
+\item[Zero Flow Pressure] (default units: \unit{Pa}, default value: 300~\unit{Pa}): The pressure above which the flow is zero.
 \end{description}
 
 
@@ -444,7 +445,7 @@ Every \ct{VENT} record requires a unique \ct{ID}, two valid \ct{COMP_IDS} (one m
 \item[\texttt{ID}] Required identifier, unique among all identifiers in the input file.
 \item[\texttt{POST\_FRACTION}] Dimensionless fraction open after a temperature or flux set point is reached; default 1.
 \item[\texttt{PRE\_FRACTION}] Dimensionless fraction open before a temperature or flux set point is reached; default 1.
-\item[\texttt{SETPOINT}] Trigger time in s, temperature in \degc, or incident heat flux in kW/m$^2$, as selected by \ct{CRITERION}.
+\item[\texttt{SETPOINT}] Trigger time in s, temperature in \unit{\degreeCelsius}, or incident heat flux in \unit{kW/m^2}, as selected by \ct{CRITERION}.
 \item[\texttt{T}] Times in s corresponding to the fractions in \ct{F}.
 \item[\texttt{TYPE}] \ct{WALL}, \ct{CEILING}, \ct{FLOOR}, or \ct{MECHANICAL}.
 \end{description}
@@ -462,18 +463,18 @@ For a wall vent, geometry is specified with \ct{BOTTOM}, \ct{WIDTH}, and either 
 
 For a ceiling or floor vent, the additional parameters are:
 \begin{description}
-\item[\texttt{AREA}] Required vent area in m$^2$.
+\item[\texttt{AREA}] Required vent area in \unit{m^2}.
 \item[\texttt{OFFSETS}] X and Y visualization offsets in m from the first compartment's origin.
 \item[\texttt{SHAPE}] Required visualization shape, \ct{ROUND} or \ct{SQUARE}.
 \end{description}
 
 For a mechanical vent, the additional parameters are:
 \begin{description}
-\item[\texttt{AREAS}] Required diffuser areas in m$^2$ at the two ends of the duct.
-\item[\texttt{CUTOFFS}] Pressure differences in Pa at which flow begins to decrease and reaches zero; defaults 200 and 300~Pa.
+\item[\texttt{AREAS}] Required diffuser areas in \unit{m^2} at the two ends of the duct.
+\item[\texttt{CUTOFFS}] Pressure differences in Pa at which flow begins to decrease and reaches zero; defaults 200 and 300~\unit{Pa}.
 \item[\texttt{FILTER\_EFFICIENCY}] Percent of soot and trace species removed after filtering activates; default 0.
 \item[\texttt{FILTER\_TIME}] Time in s at which filter activation begins; CFAST ramps to the specified efficiency over 1~s.
-\item[\texttt{FLOW}] Required nominal volumetric flow rate in m$^3$/s.
+\item[\texttt{FLOW}] Required nominal volumetric flow rate in \unit{m^3/s}.
 \item[\texttt{HEIGHTS}] Required diffuser heights in m at the two duct ends.
 \item[\texttt{OFFSETS}] X and Y visualization offsets in m.
 \item[\texttt{ORIENTATIONS}] Diffuser orientations at the two duct ends, each \ct{VERTICAL} or \ct{HORIZONTAL}; both default to \ct{VERTICAL}.
@@ -513,7 +514,7 @@ For a new fire, click on the {\bf Add New} button within the fire definition blo
 \begin{description}
 \item[Fire ID] The selected name must be unique (i.e., not the same as another fire instance in the same simulation).
 \item[Compartment] Name of the compartment where the fire occurs.
-\item[Position X, Y] (default units: m, default value: compartment center): Position of the center of the base of the fire relative to the front left corner of the compartment.
+\item[Position X, Y] (default units: \unit{m}, default value: compartment center): Position of the center of the base of the fire relative to the front left corner of the compartment.
 \item[Ignition Criterion] The time of ignition can be controlled by a user-specified time, or by a user-specified target's surface temperature or incident heat flux.
 \item[Set Point] The critical value at which ignition will occur. If it is less than or equal to zero, the default value of zero is taken.
 \item[Ignition Target] User-specified target used to calculate surface temperature or incident heat flux to ignite the fire. Target is typically placed at the base of the fire to be ignited.
@@ -528,15 +529,15 @@ The \ct{FIRE} namelist parameters are:
 \item[\texttt{FYI}] Optional descriptive text retained with the fire but not used in the calculation.
 \item[\texttt{ID}] Required fire-instance identifier, unique among all identifiers in the input file.
 \item[\texttt{IGNITION\_CRITERION}] \ct{TIME}, \ct{TEMPERATURE}, or \ct{FLUX}; default \ct{TIME}.
-\item[\texttt{LOCATION}] Required X and Y coordinates in m relative to the compartment origin. Negative coordinates are interpreted from the opposite compartment boundary when that compatibility option is enabled.
-\item[\texttt{SETPOINT}] Ignition time in s, target temperature in \degc, or target incident heat flux in kW/m$^2$. A value not greater than zero ignites the fire initially.
+\item[\texttt{LOCATION}] Required X and Y coordinates in \unit{m} relative to the compartment origin. Negative coordinates are interpreted from the opposite compartment boundary when that compatibility option is enabled.
+\item[\texttt{SETPOINT}] Ignition time in s, target temperature in \unit{\degreeCelsius}, or target incident heat flux in \unit{kW/m^2}. A value not greater than zero ignites the fire initially.
 \end{description}
 
 Each instance of a fire can be a unique fire with a different chemical composition and time-dependent fire properties. Alternatively, two or more fires can reference the same set of fire properties.
 
 In a text input file, the \ct{FIRE_ID} on a \ct{FIRE} line identifies the associated fire definition. A \ct{CHEM} line and a \ct{TABL} definition must use that same identifier. The area, heat release rate, and yield values specified by \ct{CHEM} are constant; a column with the corresponding label in the matching \ct{TABL} definition replaces the constant value with a time-dependent history. The \ct{CHEM} parameters are:
 \begin{description}
-\item[\texttt{AREA}] (units: m$^2$, default value: 0): Constant area of the fire base. CFAST treats values smaller than the area of a 0.2~m diameter circle as that minimum area. A \ct{TABL} column labeled \ct{AREA} overrides this value.
+\item[\texttt{AREA}] (units: \unit{m^2}, default value: 0~\unit{m^2}): Constant area of the fire base. CFAST treats values smaller than the area of a 0.2~m diameter circle as that minimum area. A \ct{TABL} column labeled \ct{AREA} overrides this value.
 \item[\texttt{CARBON}] (default value: 0): Number of carbon atoms in the fuel molecule.
 \item[\texttt{CHLORINE}] (default value: 0): Number of chlorine atoms in the fuel molecule. CFAST assumes that all fuel chlorine forms HCl.
 \item[\texttt{COMP\_ID}] (default value: \ct{NULL}): Legacy input accepted by the parser but not used in the current calculation. The compartment is specified by \ct{COMP_ID} on the associated \ct{FIRE} line.
@@ -564,7 +565,7 @@ Following is a list of fire properties that can be specified as a function of ti
 \item[Time] (default units: s, default values: none): Time from ignition.
 \item[HRR] (default units: kW, default values: none): Heat release rate of the fire.
 \item[Height] (default units: m, default values: 0 m): Height of the base of the fire.
-\item[Area] (default units: m$^2$, default values: calculated from heat release rate such that the fire Froude number is unity\footnote{The Fire Froude Number, $\dot{Q}^*$, is defined as $\dot{Q}^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} D^2}$. It is essentially the ratio of the fuel gas exit velocity and the buoyancy-induced plume velocity. Jet fires are characterized by large Froude numbers. Typical accidental fires have a Froude number near unity.}): Area of the base of the fire. The plume correlations used in CFAST generally regard the base to be circular. Do not set this value to zero because it is used in the various plume correlations.
+\item[Area] (default units: \unit{m^2}, default values: calculated from heat release rate such that the fire Froude number is unity\footnote{The Fire Froude Number, $\dot{Q}^*$, is defined as $\dot{Q}^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} D^2}$. It is essentially the ratio of the fuel gas exit velocity and the buoyancy-induced plume velocity. Jet fires are characterized by large Froude numbers. Typical accidental fires have a Froude number near unity.}): Area of the base of the fire. The plume correlations used in CFAST generally regard the base to be circular. Do not set this value to zero because it is used in the various plume correlations.
 \item[CO Yield] (default units: selected mass/mass units; kg/kg in SI, default value: 0): Mass of CO produced per unit mass of fuel consumed.
 \item[Soot Yield] (default units: selected mass/mass units; kg/kg in SI, default value: 0): Mass of soot produced per unit mass of fuel consumed.
 %Should this still be there if all the N2 in the fuel is assumed to go to HCN.
@@ -611,7 +612,7 @@ The generated fire curve is written directly into the fire table, where the time
 \section{Targets}
 \label{chapter:targets}
 
-A target is any object in the simulation that can heat up via radiative and convective heat transfer. The heat conduction into the target is performed via a one-dimensional calculation in either cartesian or cylindrical coordinates.
+A target is an object in the simulation subject to radiative and convective heat transfer. If a material is defined, heat conduction into the target is performed via a one-dimensional heat conduction calculation in either Cartesian or cylindrical coordinates allowing the target temperature to change over time. Targets are defined using the Targets tab.
 
 \begin{figure}[h!]
 \begin{center}
@@ -621,50 +622,32 @@ A target is any object in the simulation that can heat up via radiative and conv
 \end{figure}
 
 \begin{description}
-\item[ID] The selected name must be unique (i.e., not the same as another target in the same simulation).
+\item[ID] The selected name must be unique (i.e., not the same as another target, sprinkler, or detector in the same simulation).
 
 \item[Compartment] The compartment in which the target is located.
 
-\item[Target Type] Specify Plate or Cylindrical.  For plate targets, CFAST solves a partial differential equation in cartesian coordinates, and for cylindrical targets, a partial differential equation in cylindrical coordinates.
+\item[Target Type] Specify Plate or Cylinder.  For plate targets, CFAST solves the heat conduction equation equation in Cartesian coordinates, and for cylinder targets, CFAST solves a the equation in cylindrical coordinates.
 
-\item[Width (X)] (default units: m): Distance from the left wall of the target compartment.
+\item[Width (X)] (default units: \unit{m}): Distance from the left wall of the target compartment.
 
-\item[Depth (Y)] (default units: m): Distance from the front wall of the target compartment.
+\item[Depth (Y)] (default units: \unit{m}): Distance from the front wall of the target compartment.
 
-\item[Height (Z)] (default units: m): Height of the target above the floor.
+\item[Height (Z)] (default units: \unit{m}): Height of the target above the floor.
 
-\item[Normal Vector (X,Y,Z)]: specifies a vector of unit length perpendicular to the exposed surface of the target. For example, the vector (-1,0,0) indicates that the target is facing the left wall. The vector (0,0,1) is facing the ceiling.
+\item[Normal Vector (X,Y,Z)]: specifies a vector of unit length perpendicular to the exposed surface of the target. For example, the vector (-1,0,0) indicates that the target is facing the left (-x) wall. The vector (0,0,1) is facing the ceiling.
 
-\item[Material] What the target is made of. Any existing material in the list of thermal properties may be used here. There can be only one material per target.
+\item[Material] The material the target is made of or OFF for no heat conduction calculation. Any material defined on the Thermal Properties tab (Section~\ref{info:MATL}) may be used here. There can be only one material per target. 
+
+\item[Thickness] (default units: \unit{m}) The thickness of the target. For a plate target this is the total thickness. For a cylinder target this is the radius.
 
 %What happens to interanl temperatrue when type is cylindrical
 \item[Internal Temperature] (default units: none, default value: 0.5): For each target, CFAST calculates the internal temperature at a number of node points within the target. By default, the reported internal temperature (in the printed and spreadsheet output) is the temperature at the center of the target, e.g., equidistant from the front and back faces of the target. This input allows the user to override this default position. The input represents the position as a fraction of the thickness from the front surface to the back surface of the material.
 \end{description}
 
-The complete \ct{DEVC} text input covers targets, sprinklers, and detectors:
-\begin{description}
-\item[\texttt{ADIABATIC\_TARGET}] If \ct{T}, applies an adiabatic-surface-temperature target calculation. Supply \ct{CONVECTION_COEFFICIENTS} for this calculation.
-\item[\texttt{COMP\_ID}] Required identifier of the compartment containing the device.
-\item[\texttt{CONVECTION\_COEFFICIENTS}] Front- and back-face convection coefficients in kW/(m$^2\cdot$K); CFAST converts them to W/(m$^2\cdot$K).
-\item[\texttt{DEPTH\_UNITS}] \ct{FRACTION}, the default, interprets \ct{TEMPERATURE_DEPTH} as a fraction of target thickness; \ct{M} interprets it in m.
-\item[\texttt{FYI}] Optional descriptive text retained with the device but not used in the calculation.
-\item[\texttt{ID}] Required device identifier, unique among all identifiers in the input file.
-\item[\texttt{LOCATION}] Required X, Y, and Z coordinates in m relative to the compartment origin.
-\item[\texttt{MATL\_ID}] Material identifier for a target. If omitted, CFAST uses its default target material.
-\item[\texttt{NORMAL}] Target front-surface unit normal vector; default (0,0,1).
-\item[\texttt{RTI}] Response Time Index in $\sqrt{\mathrm{m}\cdot\mathrm{s}}$ for a heat detector or sprinkler; default 50.
-\item[\texttt{SETPOINT}] Activation temperature in \degc for a heat detector or sprinkler, or obscuration in \%/m for a smoke detector. The source default is 57~\degc for both heat detectors and sprinklers and 23.93~\%/m for smoke detectors.
-\item[\texttt{SETPOINTS}] Smoldering- and flaming-smoke obscuration set points in \%/m for a dual-threshold smoke detector. If omitted, \ct{SETPOINT} defines a single threshold.
-\item[\texttt{SPRAY\_DENSITY}] Sprinkler spray density in m/s. A value not greater than zero disables suppression.
-\item[\texttt{SURFACE\_ORIENTATION}] Alternative to \ct{NORMAL}: \ct{CEILING}, \ct{FLOOR}, \ct{FRONT WALL}, \ct{REAR WALL}, \ct{LEFT WALL}, \ct{RIGHT WALL}, or the \ct{ID} of a fire toward which the target faces.
-\item[\texttt{SURFACE\_TEMPERATURE}] Initial target surface temperature in \degc; default is the initial interior ambient temperature.
-\item[\texttt{TEMPERATURE\_DEPTH}] Position at which target internal temperature is reported; default 0.5 of the thickness.
-\item[\texttt{THICKNESS}] Target thickness in m. A zero value uses the thickness of the referenced material.
-\item[\texttt{TYPE}] Required device type: \ct{PLATE}, \ct{CYLINDER}, \ct{SPRINKLER}, \ct{HEAT_DETECTOR}, or \ct{SMOKE_DETECTOR}.
-\end{description}
 
-\graybox{
-If the target is only needed to report the local gas temperature, which may include the plume or ceiling jet, then you may specify arbitrary properties and normal vector. The output spreadsheet file includes the local gas temperature in addition to the target temperature.
+For a plate target, both sides are exposed to the compartment. The target normal vector determines which face of the target sees any fire and the view factors for the compartment surfaces.
+
+If the target is only needed to report the local gas temperature, which may include the plume or ceiling jet, then you may specify no material or arbitrary properties and normal vector. The output spreadsheet file includes the local gas temperature in addition to the target temperature.
 
 The normal vectors in the $x$, $y$, and $z$ directions from a target at [$x$, $y$, $z$] to a location [$x_L$, $y_L$, $z_L$] are:
 \begin{eqnarray}
@@ -672,14 +655,10 @@ x_N &=& \frac{x_L - x}{\sqrt{\brackets{x_L - x}^2 + \brackets{y_L - y}^2 + \brac
 y_N &=& \frac{y_L - y}{\sqrt{\brackets{x_L - x}^2 + \brackets{y_L - y}^2 + \brackets{z_L - z}^2}} \\[.1in]
 z_N &=& \frac{z_L - z}{\sqrt{\brackets{x_L - x}^2 + \brackets{y_L - y}^2 + \brackets{z_L - z}^2}}
 \end{eqnarray}
-}
-
-
-
 
 \section{Sprinklers and Detectors}
 \label{info:DEVC2}
-Sprinklers and detectors are both considered detection devices by the CFAST model and are handled using the same inputs.  Detection is based upon heat transfer to the detector. Fire suppression by a user-specified water spray begins once the associated detection device is activated.
+Sprinklers and detectors are both considered detection devices by the CFAST model and are handled using the same inputs.  Detection is based upon heat transfer to the detector. Fire suppression by a user-specified water spray begins once the associated detection device is activated.  These inputs are specified using the Detection/Suppression tab.
 
 
 \begin{figure}[h!]
@@ -690,36 +669,61 @@ Sprinklers and detectors are both considered detection devices by the CFAST mode
 \end{figure}
 
 \begin{description}
-\item[ID]  The selected name must be unique (i.e., not the same as another sprinkler or detector in the same simulation).
+\item[ID]  The selected name must be unique (i.e., not the same as another target, sprinkler, or detector in the same simulation).
 
-\item[Type] Type of detector; select smoke detector, heat detector, or sprinkler.
+\item[Type] Type of detector; select smoke (detector), heat (detector), or sprinkler.
 
 \item[Compartment] The compartment in which the detector or sprinkler is located.
 
-\item[Activation Temperature] (default units: \degc, default value: dependent on type): the temperature at or above which the detector link activates.
+\item[Activation Temperature] (default units: \unit{\degreeCelsius}), default value: dependent on type): the temperature at or above which the detector link activates.
 
-\item[Activation Obscuration] (default units: \%/m, default value: 23.93 \%/m (8 \%/ft)): the obscuration at or above which the detector link activates.
+\item[Activation Obscuration] (default units: \unit{\%/m}, default value: 23.93~\unit{\%/m} (8 ~\unit{\%/ft}): the obscuration at or above which the detector link activates.
 
-\item[Width (X)] Position (default units: m, default value: none): position of the object as a distance from the left wall of the compartment (X direction).
+\item[Width (X)] Position (default units: \unit{m}, default value: none): position of the object as a distance from the left wall of the compartment (X direction).
 
-\item[Depth (Y)] Position (default units: m, default value: none): position of the detector or sprinkler as a distance from the front wall of the compartment (Y direction).
+\item[Depth (Y)] Position (default units: \unit{m}, default value: none): position of the detector or sprinkler as a distance from the front wall of the compartment (Y direction).
 
-\item[Height (Z)] Position (default units: m, default value: none): position of the object as a distance from the floor of the compartment (Z direction).
+\item[Height (Z)] Position (default units: \unit{m}, default value: none): position of the object as a distance from the floor of the compartment (Z direction).
 
-\item[RTI] (default units: (m$\cdot$s)$^{1/2}$, default value: none): the Response Time Index (RTI) for the sprinkler or detection device.
+\item[RTI] (default units: \unit{(m.s)\tothe{1/2}}, default value: none): the Response Time Index (RTI) for the sprinkler or detection device.
 
-\item[Spray Density] (default units: m/s, default value: none): the amount of water dispersed by a sprinkler.  The units for spray density are length/time, derived by dividing the volumetric flow rate by the spray area. The suppression calculation is based upon an experimental correlation by Evans~\cite{Evans:1993}.
+\item[Spray Density] (default units: \unit{m/s}, default value: none): the amount of water dispersed by a sprinkler.  The units for spray density are length/time, derived by dividing the volumetric flow rate by the spray area. The suppression calculation is based upon an experimental correlation by Evans~\cite{Evans:1993}.
 \end{description}
 
 \graybox{
-Care should be taken when specifying detectors to activate based on smoke obscuration since the only calculation included in CFAST is a simple two-zone calculation of soot concentration that does not include the impact of an initial ceiling layer as is done for temperature-based calculations. Often, the activation of smoke alarms is simulated with a temperature-based criterion (in CFAST as a heat alarm), typically in the range of 5~\degc to 10~\degc above ambient. Davis and Notarianni  studied the activation of heat and smoke alarms in small and large compartments \cite{Davis:1996}. They conclude that a temperature rise of approximately 5~\degc corresponded to activation of ionization alarms for a range of fire sources and ceiling heights. The Nuclear Regulatory Commission includes a default value of 10~\degc with an RTI value of 5 (m$\cdot$s)$^{1/2}$ in NUREG-1805 \cite{NRCNUREG1805}. \\
+Care should be taken when specifying detectors to activate based on smoke obscuration since the only calculation included in CFAST is a simple two-zone calculation of soot concentration that does not include the impact of an initial ceiling layer as is done for temperature-based calculations. Often, the activation of smoke alarms is simulated with a temperature-based criterion (in CFAST as a heat alarm), typically in the range of 5~\unit{\degreeCelsius} to 10~\unit{\degreeCelsius} above ambient. Davis and Notarianni  studied the activation of heat and smoke alarms in small and large compartments \cite{Davis:1996}. They conclude that a temperature rise of approximately 5~\unit{\degreeCelsius} corresponded to activation of ionization alarms for a range of fire sources and ceiling heights. The Nuclear Regulatory Commission includes a default value of 10~~\unit{\degreeCelsius} with an RTI value of 5~\unit{(m.s)\tothe{1/2}} in NUREG-1805 \cite{NRCNUREG1805}. \\
 
 Several cautions should be observed when using estimates of sprinkler suppression within the model: 1)~The first sprinkler activated controls the effect of the sprinkler on the heat release rate of the fire.  Subsequent sprinklers which may activate have no additional effect on the fire simulation. 2)~The fire suppression algorithm assumes the effect of the sprinkler is solely to reduce the heat release rate of the fire. Any effects of the sprinkler spray on gas temperatures or mixing within the compartment are ignored. 3)~The sprinkler always reduces the heat release rate of the fire. The ability of a fire to overwhelm an under-designed sprinkler is not modeled. 4) Since the dynamics of the sprinkler and direct effects of the spray on gas temperatures and velocities are not modeled, calculated times of activation of secondary sprinklers and / or detectors after the first sprinkler is activated should not be modeled since the impact of the first sprinkler on the activation of additional sprinklers is not included in the CFAST model.}
 
+\section{\ct{DEVC} Inputs}
 
+Targets, sprinklers, and detector inputs are written to the \ct{DEVC} namelist. 
 
+\begin{description}
+    \item[\texttt{ADIABATIC\_TARGET}] If \ct{T}, applies an adiabatic-surface-temperature target calculation using the emissivity of the assigned \ct{MATL_ID}. Supply \ct{CONVECTION_COEFFICIENTS} for this calculation.
+    \item[\texttt{COMP\_ID}] Required identifier of the compartment containing the device.
+    \item[\texttt{CONVECTION\_COEFFICIENTS}] Front- and back-face convection coefficients in \unit{kW/(m^2 K)}.
+    \item[\texttt{DEPTH\_UNITS}] Character string defining how \ct{TEMPERATURE_DEPTH} is interpreted. If \ct{FRACTION}, \ct{TEMPERATURE_DEPTH} is a fraction of target thickness. If \ct{M}, \ct{TEMPERATURE_DEPTH} is the actual depth in \unit{m}.
+    \item[\texttt{FYI}] Optional descriptive text retained with the device but not used in the calculation.
+    \item[\texttt{ID}] Required device identifier, unique among all \ct{DEVC} identifiers in the input file.
+    \item[\texttt{LOCATION}] Required X, Y, and Z coordinates in \unit{m} relative to the compartment origin.
+    \item[\texttt{MATL\_ID}] Material identifier for a target. If omitted, CFAST uses its default target material.
+    \item[\texttt{NORMAL}] Target front-surface unit normal vector; default (0,0,1).
+    \item[\texttt{RTI}] Response Time Index in \unit{(m.s)\tothe{1/2}} for a heat detector or sprinkler; default 50~~\unit{(m.s)\tothe{1/2}}.
+    \item[\texttt{SETPOINT}] Activation temperature in \unit{\degreeCelsius} for a heat detector or sprinkler, or obscuration in \unit{\%/m} for a smoke detector. The source default is 57~\unit{\degreeCelsius} for both heat detectors and sprinklers and 23.93~\%/m for smoke detectors.
+    \item[\texttt{SETPOINTS}] Smoldering- and flaming-smoke obscuration set points in \%/m for a dual-threshold smoke detector. If omitted, \ct{SETPOINT} defines a single threshold.
+    \item[\texttt{SPRAY\_DENSITY}] Sprinkler spray density in \unit{m/s}. A value not greater than zero disables suppression.
+    \item[\texttt{SURFACE\_ORIENTATION}] Alternative to \ct{NORMAL}: \ct{CEILING}, \ct{FLOOR}, \ct{FRONT WALL}, \ct{REAR WALL}, \ct{LEFT WALL}, \ct{RIGHT WALL}, or the \ct{ID} of a fire toward which the target faces.
+    \item[\texttt{SURFACE\_TEMPERATURE}] Initial target surface temperature in \unit{\degreeCelsius}; default is the initial interior ambient temperature.
+    \item[\texttt{TEMPERATURE\_DEPTH}] Position at which target internal temperature is reported; default 0.5 of the thickness.
+    \item[\texttt{THICKNESS}] Target thickness in m. A zero value uses the thickness of the referenced material.
+    \item[\texttt{TYPE}] Required device type: \ct{PLATE}, \ct{CYLINDER}, \ct{SPRINKLER}, \ct{HEAT_DETECTOR}, or \ct{SMOKE_DETECTOR}.
+\end{description}
 
 \chapter{Surface Connections}
+
+The Surface Connections tab allows the user to define heat transfer between compartments in a simulation. Energy can be transferred from compartment to compartment through solid boundaries (walls, ceilings and floors) by means of conduction. The heat transfer between connected compartments is modeled by setting the boundary condition for the outside surface of a compartment to the temperature of the outside surface of the  connected compartment.  As before, temperatures are determined by the solver so that the heat flux striking the wall surface (both interior and exterior) is consistent with the temperature gradient at that surface.
+
 \label{info:CONN}
 \begin{figure}[h!]
 \begin{center}
@@ -728,33 +732,35 @@ Several cautions should be observed when using estimates of sprinkler suppressio
 \end{center}
 \end{figure}
 
-The Surface Connections page allows the user to define heat transfer between compartments in a simulation. Energy can be transferred from compartment to compartment through solid boundaries (walls, ceilings and floors) by means of conduction. The heat transfer between connected compartments is modeled by setting the boundary condition for the outside surface of a compartment to the temperature of the outside surface of the  connected compartment.   As before, temperatures are determined by the solver so that the heat flux striking the wall surface (both interior and exterior) is consistent with the temperature gradient at that surface.
+
+For wall connections the inputs are:
 
 \begin{description}
-\item[First Compartment] First of the compartments whose walls are connected for horizontal heat transfer.
+    \item[First Compartment] First of the compartments whose walls are connected.
 
-\item[Second Compartment] Second of the compartments whose walls are connected for horizontal heat transfer.
+    \item[Second Compartment] Second of the compartments whose walls are connected.
 
-\item[Fraction] Specifies the fraction of the vertical surface areas of the compartments which are connected. The fraction specifies the fraction of the vertical surface area of the first compartment that connects the first and second compartment pair.
-
-\item[Top Compartment] The top or first of the two compartments to be connected by a vertical heat transfer connection. The connection is through the floor of this compartment.
-
-\item[Bottom Compartment] The bottom or second of the two compartments to be connected by a vertical heat transfer connection. The connection is through the ceiling of this compartment.
+    \item[Fraction] Specifies the fraction of the vertical surface areas of the compartments which are connected. The fraction specifies the fraction of the vertical surface area of the first compartment that connects the first and second compartment pair.
 \end{description}
 
-The \ct{CONN} namelist parameters are:
+When specifying a horizontal connection, a connection must be defined for both directions. The specified area fractions should result in the same connected area. Additionally, for any single compartment the sum of area fractions for all the connected vertical surfaces cannot exceed unity. If the sum is less than unity, the unallocated fraction is assumed to be connected to the ambient. As an example consider two compartments that share a wall where the first compartment is 1~\unit{m} x 1~\unit{m} x 1~\unit{m}  and the second compartment is 2~\unit{m} x 2~\unit{m}  x 2~\unit{m} . The total wall area for the first compartment is 4~\unit{m^2}. The total wall area for the second compartment is 16~\unit{m^2}. If the first compartment shares one entire wall, then the fraction would be 0.25 (1~\unit{m^2}/4~\unit{m^2}).  For the second compartment the fraction would be 0.0625 (1~\unit{m^2}/16~\unit{m^2}).
+
+For ceiling/floor connections the inputs are:
+
 \begin{description}
-\item[\texttt{COMP\_ID}] Required source compartment. For a wall connection, the fractions apply to this compartment's wall area; for a vertical connection, this is the first compartment.
-\item[\texttt{COMP\_IDS}] Required destination compartment identifiers. A wall connection may list multiple compartments or \ct{OUTSIDE}; a ceiling or floor connection uses the first value.
-\item[\texttt{F}] Wall-area fractions corresponding to \ct{COMP_IDS}; each value must be between 0 and 1. This parameter is not used for ceiling or floor connections.
-\item[\texttt{TYPE}] Required connection type: \ct{WALL}, \ct{CEILING}, or \ct{FLOOR}. The two vertical types are processed identically; \ct{COMP_ID} supplies the upper compartment and \ct{COMP_IDS(1)} the lower compartment.
+    \item[Top Compartment] The top of the two compartments to be connected by a ceiling/floor heat transfer connection. The connection is through the floor of this compartment.   
+   
+    \item[Bottom Compartment] The bottom of the two compartments to be connected by a ceiling/floor heat transfer connection. The connection is through the ceiling of this compartment.
 \end{description}
 
-\graybox{Consider two compartments that share a single wall. Both compartments are 1 m x 1 m x 1 m in size. The resulting horizontal heat transfer connections would be 0.25 for both compartments since they share 1 m$^2$ of a total wall surface of 4 m$^2$. If the compartments are of different size, then the fraction would be different for the two directions. For example, if compartment 1 is 1 m x 1 m x 1 m and compartment 2 is 2 m x 2 m x 2 m, then the connection from 1$>$2 is 0.25 and the connection from 2$>$1 is 0.125.
+Connection inputs are written to the \ct{CONN} namelist. The available parameters are:
 
-For horizontal heat transfer, you must include a connection for each compartment. For example, for a connection between compartment 1 and compartment 2, you must include a connection from 1 to 2 AND a connection from 2 to 1.  For consistency, the fraction for each compartment needs to specify equal areas in the two compartments.  Fractions for connections should add to unity.  An error is generated if the fractions for a compartment add to greater than unity. If the fractions for a compartment add to less than unity, the remaining surface area will be assigned to be connected to the outdoors.}
-
-
+\begin{description}
+\item[\texttt{COMP\_ID}] The source compartment. For a ceiling/floor connection, this is the upper compartment.
+\item[\texttt{COMP\_IDS}] An array of destination compartment identifiers. A wall connection may list multiple compartments or \ct{OUTSIDE} for the ambient. A ceiling/floor connection uses only the first value and it corresponds to the lower compartment.
+\item[\texttt{F}] An array of wall-area fractions corresponding to \ct{COMP_IDS}; each value must be between 0 and 1. These fractions are based on the wall area for \ct{COMP\_ID}. This parameter is not used for ceiling or floor connections. Up to 200 connections can be defined for each compartment.
+\item[\texttt{TYPE}] An array of connection types: \ct{WALL}, \ct{CEILING}, or \ct{FLOOR} corresponding to \ct{COMP_IDS}. The two vertical types are processed identically (i.e., \ct{COMP_ID} is always the upper compartment).
+\end{description}
 
 
 \chapter{Visualization}
@@ -785,7 +791,7 @@ Calculated results from a CFAST simulation can be visualized using Smokeview \ci
 Temperature isosurfaces are not configured in the CEdit Output tab. To request a surface of constant gas temperature, specify an \ct{ISOF} record in the input file:
 \begin{description}
 \item[\texttt{COMP\_ID}] Required identifier of the compartment containing the isosurface.
-\item[\texttt{VALUE}] Required isosurface temperature in \degc.
+\item[\texttt{VALUE}] Required isosurface temperature in \unit{\degreeCelsius}.
 \end{description}
 
 An \ct{SLCF} record creates a two- or three-dimensional Smokeview slice:
@@ -869,10 +875,10 @@ The \ct{DIAG} namelist is intended for model verification and developer diagnost
 \item[\texttt{DEBUG\_PRINT}] Enables general debug output; default \ct{OFF}.
 \item[\texttt{DOOR\_JET\_FIRE\_SUB\_MODEL}] Enables burning in a door jet; default \ct{ON}.
 \item[\texttt{ENTRAINMENT\_SUB\_MODEL}] Enables plume entrainment; default \ct{ON}.
-\item[\texttt{F}] Gas-temperature values in \degc for the verification history defined at times \ct{T}; both arrays are required together.
+\item[\texttt{F}] Gas-temperature values in \unit{\degreeCelsius} for the verification history defined at times \ct{T}; both arrays are required together.
 \item[\texttt{FIRE\_SUB\_MODEL}] Enables the fire calculation; default \ct{ON}.
 \item[\texttt{GAS\_ABSORBTION\_SUB\_MODEL}] Selects \ct{CALCULATED} gas absorption, the default, or \ct{CONSTANT}. The parameter name retains its source-code spelling.
-\item[\texttt{GAS\_TEMPERATURE}] Gas temperature in \degc for radiation verification. Use with both partial-pressure parameters below.
+\item[\texttt{GAS\_TEMPERATURE}] Gas temperature in \unit{\degreeCelsius} for radiation verification. Use with both partial-pressure parameters below.
 \item[\texttt{HORIZONTAL\_FLOW\_SUB\_MODEL}] Enables horizontal vent flow; default \ct{ON}.
 \item[\texttt{KEYBOARD\_INPUT}] Enables interactive keyboard input during a run; default \ct{ON}.
 \item[\texttt{LAYER\_MIXING\_SUB\_MODEL}] Enables interlayer mixing; default \ct{ON}.
@@ -882,13 +888,13 @@ The \ct{DIAG} namelist is intended for model verification and developer diagnost
 \item[\texttt{PARTIAL\_PRESSURE\_CO2}] CO$_2$ partial pressure in Pa for radiation verification.
 \item[\texttt{PARTIAL\_PRESSURE\_H2O}] H$_2$O partial pressure in Pa for radiation verification.
 \item[\texttt{RADIATION\_SUB\_MODEL}] Enables thermal radiation; default \ct{ON}.
-\item[\texttt{RADIATIVE\_INCIDENT\_FLUX}] Imposed incident flux in kW/m$^2$ for adiabatic-target verification; default 0.
+\item[\texttt{RADIATIVE\_INCIDENT\_FLUX}] Imposed incident flux in \unit{kW/m^2} for adiabatic-target verification; default 0~\unit{kW/m^2}.
 \item[\texttt{RAD\_SOLVER}] Set to \ct{RADNNET} to use the neural-network radiation solver; otherwise the standard solver is used.
 \item[\texttt{RESIDUAL\_DEBUG\_PRINT}] Enables solver-residual diagnostic output; default \ct{OFF}.
 \item[\texttt{STEADY\_STATE\_INITIAL\_CONDITIONS}] Enables steady-state initialization diagnostics; default \ct{OFF}.
 \item[\texttt{T}] Times in s corresponding to the verification temperatures in \ct{F}.
 \item[\texttt{UPPER\_LAYER\_THICKNESS}] Imposed upper-layer thickness in m for radiation verification.
-\item[\texttt{VERIFICATION\_FIRE\_HEAT\_FLUX}] Imposed fire heat flux in kW/m$^2$ for verification.
-\item[\texttt{VERIFICATION\_TIME\_STEP}] Time step in s used by verification calculations; default 0.
+\item[\texttt{VERIFICATION\_FIRE\_HEAT\_FLUX}] Imposed fire heat flux in \unit{kW/m^2} for verification.
+\item[\texttt{VERIFICATION\_TIME\_STEP}] Time step in s used by verification calculations; default 0~S.
 \item[\texttt{VERTICAL\_FLOW\_SUB\_MODEL}] Enables vertical vent flow; default \ct{ON}.
 \end{description}
