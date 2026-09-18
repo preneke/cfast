@@ -281,7 +281,7 @@
     ! get command line as a single string
     ! arguments: cmdlin - command line
 
-    character(len=*), intent(out) :: cmdlin
+    character(len=127), intent(out) :: cmdlin
 
     integer first, last, lpoint
     integer maxarg, iar, i, ic

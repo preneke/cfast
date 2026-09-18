@@ -644,6 +644,12 @@
     datapath = ' '
     project = ' '
     extension = ' '
+    buf = ' '
+    xname = ' '
+    drive(1:2) = ' '
+    dir(1:2) = ' '
+    ext(1:2) = ' '
+    
     
     ! only look at the first two arguments (1 = executable name, 2 =cfast input file name)
     idx(1) = 1

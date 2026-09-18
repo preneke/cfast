@@ -16,7 +16,7 @@ module initialization_routines
         smoked, mx_dumps, mxss
     use defaults, only: default_temperature, default_pressure, default_relative_humidity, default_rti, &
         default_activation_temperature, default_lower_oxygen_limit, default_radiative_fraction
-    use devc_data, only: n_detectors, detectorinfo, n_targets, targetinfo, alloc_devc, init_devc
+    use devc_data, only: n_detectors, detectorinfo, n_targets, n_targimplct, targetinfo, alloc_devc, init_devc
     use dump_data, only: n_dumps, dumpinfo, csvnames, iocsv_compartments, iocsv_vents, iocsv_masses, iocsv_walls, iocsv_devices, &
         alloc_dump, init_dump
     use fire_data, only: n_fires, fireinfo, n_tabls, tablinfo, n_furn, mxpts, lower_o2_limit, tgignt, summed_total_trace, &
@@ -31,7 +31,7 @@ module initialization_routines
         interior_ambient_n2_mass_fraction, exterior_ambient_n2_mass_fraction
     use setup_data, only: iofill, debugging, deltat, init_scalars, errormessage
     use solver_data, only: p, maxteq, stpmin, stpmin_cnt, stpmin_cnt_max, stpminflag, nofp, nofwt, noftu, nofvu, noftl, &
-        nofoxyu, nofoxyl, nofprd, nequals, i_speciesmap, jaccol, stp_cnt_max
+        nofoxyu, nofoxyl, noftarg, nofprd, nequals, i_speciesmap, jaccol, stp_cnt_max
     use spreadsheet_output_data, only: n_sscomp, sscompinfo, n_ssdevice, ssdeviceinfo, n_sswall, sswallinfo, &
         n_ssmass, ssmassinfo, n_ssvent, ssventinfo, alloc_ss, init_ss
     use vent_data, only: n_hvents, hventinfo, n_vvents, vventinfo, n_mvents, mventinfo, n_leaks, leakinfo, alloc_vent, init_vent
@@ -142,6 +142,18 @@ module initialization_routines
                 p(ii) = interior_ambient_temperature
             end if
         end do
+    end do
+    
+    ii = noftarg
+    do i = 1, n_targets
+        targptr => targetinfo(i)
+        if (targptr%implicit_solver) then
+            ii = ii + 1
+            p(ii) = interior_ambient_temperature
+            ii = ii + 1
+            p(ii) = interior_ambient_temperature
+            write(*,*) ii,p(ii-1),p(ii)
+        end if 
     end do
 
     ! establish default values for detector data
@@ -543,6 +555,7 @@ module initialization_routines
 
         ! targets
         n_targets = 0
+        n_targimplct = 0
         targetinfo(1:mxtarg)%id = ' '
         targetinfo(1:mxtarg)%room = 0
         targetinfo(1:mxtarg)%equaton_type = pde
@@ -552,6 +565,7 @@ module initialization_routines
         targetinfo(1:mxtarg)%dfed_gas = 0.0_eb
         targetinfo(1:mxtarg)%fed_heat = 0.0_eb
         targetinfo(1:mxtarg)%dfed_heat = 0.0_eb
+        targetinfo(1:mxtarg)%implicit_solver = .false. 
     end if 
     
     ! fires
@@ -811,6 +825,9 @@ module initialization_routines
                     end if
                 end if
             end do
+        end if
+        if (targptr%implicit_solver) then
+            n_targimplct =n_targimplct + 1
         end if
 
         ! set up target thermal properties
@@ -1144,6 +1161,7 @@ module initialization_routines
     ! nofvu = upper layer volume
     ! noftl = lower layer temperature
     ! nofwt = wall surface temperatures (equivalent to the number of profiles)
+    ! noftarg = targets being solved implicitly front and back surface temps
     ! nofprd = species
     ! nequals = last element in the array.
 
@@ -1182,7 +1200,8 @@ module initialization_routines
     nofoxyl = noftl + n_rooms
     nofoxyu = nofoxyl + noxygen
     nofwt = nofoxyu + noxygen
-    nofprd = nofwt + n_cons
+    noftarg = nofwt + n_cons
+    nofprd = noftarg + 2*n_targimplct
     nequals = nofprd + 2*n_rooms*ns
 
     return

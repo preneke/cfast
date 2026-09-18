@@ -67,6 +67,7 @@ module target_routines
     ! for each target calculate the residual and update target temperature (if update = 1)
     do itarg = 1, n_targets
         targptr => targetinfo(itarg)
+        if (targptr%implicit_solver) cycle
 
         ! calculate net flux striking each side of target
         iroom = targptr%room
@@ -110,22 +111,26 @@ module target_routines
             nmnode(1) = nnodes_trg
             nmnode(2) = nnodes_trg - 2
             nslab = 1
-            if (iieq==pde) then
-                iwbound = 4
-                walldx(1:nnodes_trg-1) = xl*x_node(1:nnodes_trg-1)
-                call conductive_flux (update,tempin,tempout,dt,wk,wspec,wrho,targptr%temperature,walldx,nmnode,nslab,&
-                    wfluxin,wfluxout,iwbound,tgrad,tderv)
-            else if (iieq==cylpde) then
-                wfluxavg = (wfluxin+wfluxout)/2.0_eb
-                iwbound = 4
-                call cylindrical_conductive_flux (iwbound,tempin,targptr%temperature,nmnode(1),wfluxavg,&
-                    dt,wk(1),wrho(1),wspec(1),xl,tgrad)
-            end if
+            if (.not.targptr%implicit_solver) then
+                if (iieq==pde) then
+                    iwbound = 4
+                    walldx(1:nnodes_trg-1) = xl*x_node(1:nnodes_trg-1)
+                    call conductive_flux (update,tempin,tempout,dt,wk,wspec,wrho,targptr%temperature,walldx,nmnode,nslab,&
+                        wfluxin,wfluxout,iwbound,tgrad,tderv)
+                    targptr%t_surfaces(1) = targptr%temperature(idx_tempf_trg)
+                    targptr%t_surfaces(2) = targptr%temperature(idx_tempb_trg)
+                else if (iieq==cylpde) then
+                   wfluxavg = (wfluxin+wfluxout)/2.0_eb
+                   iwbound = 4
+                   call cylindrical_conductive_flux (iwbound,tempin,targptr%temperature,nmnode(1),wfluxavg,&
+                       dt,wk(1),wrho(1),wspec(1),xl,tgrad)
+                end if
 
-            ! limit target temperature to flame temperature
-            do i = idx_tempf_trg,idx_tempb_trg
-                targptr%temperature(i) = min(targptr%temperature(i),t_inf+t_max)
-            end do
+                ! limit target temperature to flame temperature
+                do i = idx_tempf_trg,idx_tempb_trg
+                    targptr%temperature(i) = min(targptr%temperature(i),t_inf+t_max)
+                end do
+            end if
         end if
         
         ! calculate tenability for this time step

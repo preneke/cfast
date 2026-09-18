@@ -232,7 +232,8 @@ module cfast_types
                                             ! default is 'FRACTION' for backwards compatibility
         character(len=128) :: surface_orientation
         
-        real(eb) :: surface_temperature   ! fixed front surface temperature for calculation of gauge heat flux.
+        logical  :: implicit_solver     ! flag for using DASSL to solve particular target temps.
+        real(eb) :: surface_temperature ! fixed front surface temperature for calculation of gauge heat flux.
         real(eb) :: center(3)           ! position of target center
         real(eb) :: normal(3)           ! target normal vector
         real(eb) :: k                   ! target thermal conductivity (from matching thermal properties input)
@@ -255,6 +256,7 @@ module cfast_types
         real(eb) :: flux_net_front      ! net heat flux to front surface of target (calculated)
         real(eb) :: flux_net_back       ! net heat flux to back surface of target (calculated)
         real(eb), dimension(nnodes_trg) :: temperature  ! target temperatures from front to back
+        real(eb) :: t_surfaces(2)
         
         integer :: layer                ! layer (within the compartment) where the target is located (calculated)
         real(eb) :: tgas                ! gas temperature near target

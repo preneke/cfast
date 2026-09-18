@@ -26,9 +26,9 @@ module solve_routines
     use cenviro, only: odevara, odevarb, odevarc, constvar, cp, rgas, gamma
     use cparams, only: u, l, m, q, mxrooms, mxtarg, mxnode, mxbranch, mxdiscon, maxeq, ns, check_state, set_state, update_state, &
         nwal, ns_mass, vminfrac, n2, o2, co2, co, h2o, w_from_room, w_to_room, w_from_wall, w_to_wall, w_boundary_condition, &
-        radiation_fix
+        radiation_fix, idx_tempf_trg, idx_tempb_trg
     
-    use devc_data, only: n_detectors, n_targets, targetinfo, idset
+    use devc_data, only: n_detectors, n_targets, n_targimplct, targetinfo, idset
     use diag_data, only: radi_verification_flag, verification_time_step, upper_layer_thickness, dbtime, gas_temperature, &
         partial_pressure_co2, partial_pressure_h2o, residfile, ioresid, residcsv, residfirst, residprn, ioslab, slabcsv, prnslab
     use fire_data, only: n_fires, fireinfo, n_furn, furn_time, furn_temp, qfurnout
@@ -38,13 +38,13 @@ module solve_routines
     use room_data, only: n_rooms, roominfo, n_cons, surface_connections, n_vcons, vertical_connections, &
         exterior_ambient_temperature, exterior_abs_pressure, pressure_ref, pressure_offset, relative_humidity, iwbound, &
         interior_ambient_o2_mass_fraction, exterior_ambient_o2_mass_fraction, &
-        interior_ambient_n2_mass_fraction, exterior_ambient_n2_mass_fraction
+        interior_ambient_temperature, interior_ambient_n2_mass_fraction, exterior_ambient_n2_mass_fraction
     use setup_data, only: iofilo, iofill, initializeonly, stime, i_time_step, time_end, deltat, print_out_interval, &
         smv_out_interval, ss_out_interval, nokbd, stopfile, queryfile, cfast_version, errormessage
     use smkview_data, only: smv_room, smv_xfire, smv_yfire, smv_zfire, smv_relp, smv_zlay, smv_tu, smv_tl, smv_qdot, smv_height
     use solver_data, only: maxteq, rpar2, ipar2, p, pold, pdold, pinit, told, dt, aptol, atol, rtol, rptol, awtol, rwtol, algtol, &
-        nofp, nequals, nofprd, nofwt, noftu, noftl, nofvu, nofoxyu, nofoxyl, ndisc, discon, stpmin, stpminflag, stpmin_cnt, &
-        stpmin_cnt_max, stpmax, stpfirst, jacdim, i_speciesmap, I_wallmap, stp_cnt_max
+        nofp, nequals, nofprd, nofwt, noftarg, noftu, noftl, nofvu, nofoxyu, nofoxyl, ndisc, discon, stpmin, stpminflag, &
+        stpmin_cnt, stpmin_cnt_max, stpmax, stpfirst, jacdim, i_speciesmap, i_wallmap, stp_cnt_max, i_targmap
     use vent_data, only: n_hvents, hventinfo, n_vvents, vventinfo, n_mvents, mventinfo
 
     implicit none
@@ -134,6 +134,9 @@ module solve_routines
     do i = 1, n_cons
         pdold(i+nofwt) = 0.0_eb
     end do
+    do i = 1, 2*n_targimplct
+        pdold(i+noftarg) = 0.0_eb
+    end do 
     return
     end subroutine initial_solution
 
@@ -321,6 +324,10 @@ module solve_routines
     do i = 1, n_cons
         vatol(i+nofwt) = awtol
         vrtol(i+nofwt) = rwtol
+    end do
+    do i = 1, n_targets
+        vatol(i+noftarg) = awtol
+        vrtol(i+noftarg) = rwtol
     end do
 
     ovtime = 0.0_eb
@@ -542,7 +549,7 @@ module solve_routines
                 call write_error_component (ieqmax)
                 write (*,'(a,i0)') '***Error, dassl - idid = ', idid
                 write (iofill,'(a,i0)') '***Error, dassl - idid = ', idid
-                call post_process
+                !call post_process
                 stop
             end if
 
@@ -623,7 +630,7 @@ module solve_routines
                         write (*,'(a,f10.5,1x,a,f10.5)') '***Error, Problem in DASSL backing from ',t,'to time ',tdout
                         write (iofill,'(a,i0)') '***Error, dassl - idid = ', idid
                         write (iofill,'(a,f10.5,1x,a,f10.5)') '***Error, Problem in DASSL backing from ',t,'to time ',tdout
-                        call post_process
+                        !call post_process
                         write (errormessage,'(a)') '***Error, Equation solver could not find a solution.'
                         call cfastexit ('solve_simulation', 3)
                         stop
@@ -881,6 +888,9 @@ module solve_routines
 
     ! data structures for rooms
     type(room_type), pointer :: roomptr
+    
+    ! data structures for targets
+    type(target_type), pointer :: targptr
 
     ! data structure for total flows and fluxes
     real(eb) :: flows_total(mxrooms,ns+2,2), fluxes_total(mxrooms,nwal)
@@ -904,9 +914,10 @@ module solve_routines
     real(eb) :: flows_layer_mixing(mxrooms, ns+2, 2)
 
     logical :: djetflg
-    integer :: nprod, i, iroom, iprod, ip, iwall, nprodsv, iprodu, iprodl
+    integer :: nprod, i, iroom, iprod, ip, iwall, nprodsv, iprodu, iprodl, itarg
     real(eb) :: epsp, aroom, hceil, pabs, hinter, ql, qu, tmu, tml
     real(eb) :: oxydu, oxydl, pdot, tlaydu, tlaydl, vlayd, prodl, produ
+    REAL(eb) :: tf, tb
 
     ires = ires ! just to get rid of a warning message
     nprod = ns
@@ -1127,6 +1138,19 @@ module solve_routines
 
     ! conduction residual
     call conduction (update,dt,fluxes_total,f_vector)
+    
+    i = noftarg
+    do itarg = 1, n_targets
+        targptr => targetinfo(itarg)
+        if (targptr%implicit_solver) then
+            tf = interior_ambient_temperature + (100.0_eb - 20.0_eb)/3000._eb*tsec
+            tb = interior_ambient_temperature + ( 50.0_eb - 20.0_eb)/3000._eb*tsec
+            i = i + 1
+            f_vector(i) = tf - y_vector(i)
+            i = i + 1
+            f_vector(i) = tb - y_vector(i)
+        end if
+    end do
 
     ! residuals for stuff that is solved in solve_simulation itself, and not by dassl
     if (nprod/=0) then
@@ -1167,6 +1191,7 @@ module solve_routines
     real(eb) :: zlay, ztarg, ppgas, totl, totu, rtotl, rtotu, oxyl, oxyu
     real(eb) :: xt, xtemp, xh2o, ptemp, epscut
     real(eb) :: xmax, xmid, ymax, ymid, zmax
+    real(eb) :: tempf, tempb
 
     type(room_type), pointer :: roomptr, deadroomptr
     type(target_type), pointer :: targptr
@@ -1352,6 +1377,19 @@ module solve_routines
                 end if
             end do
         end do
+        
+        ! define i_targmap
+        ieq = noftarg
+        i_targmap(1:n_targets,1:2) = 0
+        do itarg = 1, n_targets
+            targptr => targetinfo(itarg)
+            if (targptr%implicit_solver) then
+                ieq = ieq + 1
+                i_targmap(itarg,1) = ieq
+                ieq = ieq + 1
+                i_targmap(itarg,2) = ieq
+            end if
+        end do 
 
         ! update surface_connections for ceiling/floors that are connected
         do i = 1, n_vcons
@@ -1551,6 +1589,18 @@ module solve_routines
                     end if
                 end if
             end do
+        end do
+        
+        do i = 1, n_targets
+            targptr =>targetinfo(i)
+            if (targptr%implicit_solver) then
+                targptr%t_surfaces(1) = y_vector(i_targmap(i,1))
+                targptr%t_surfaces(2) = y_vector(i_targmap(i,2))
+                targptr%temperature(idx_tempf_trg) = targptr%t_surfaces(1)
+                targptr%temperature(idx_tempb_trg) = targptr%t_surfaces(2)
+                tempf = y_vector(i_targmap(i,1))
+                tempb = y_vector(i_targmap(i,2))
+            end if
         end do
 
         ! define species masses

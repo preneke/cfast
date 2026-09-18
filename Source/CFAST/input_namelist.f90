@@ -786,10 +786,11 @@
     real(eb),dimension(2) :: setpoints
     character(len=64) :: comp_id, id, matl_id, type, depth_units, surface_orientation
     character(len=128) :: fyi
-    logical :: adiabatic_target
+    logical :: adiabatic_target,implicit_solver
     real(eb), dimension(2) :: convection_coefficients
     namelist /DEVC/ comp_id, type, id, temperature_depth, depth_units, location, matl_id, normal, surface_orientation, &
-        surface_temperature, thickness, rti, setpoint, spray_density, setpoints, adiabatic_target, convection_coefficients, fyi
+        surface_temperature, thickness, rti, setpoint, spray_density, setpoints, adiabatic_target, convection_coefficients, &
+        fyi, implicit_solver
 
     ios = 1
 
@@ -870,6 +871,7 @@
 
                 targptr%room = iroom
                 targptr%room_id = compartment_id
+                targptr%implicit_solver = implicit_solver
 
                 ! position and normal vector
                 if (convert_negative_distances) then
@@ -1068,6 +1070,7 @@
     spray_density                   = -300.0_eb
     adiabatic_target                = .false.
     convection_coefficients(:)      = 0._eb
+    implicit_solver                 = .false. 
 
     end subroutine set_defaults
 

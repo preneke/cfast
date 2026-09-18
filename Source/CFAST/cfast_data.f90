@@ -34,7 +34,9 @@ module devc_data
     integer :: idset    ! compartment where detector just went off. more than one
                         ! sprinkler in a compartment is meaningless to CFAST
 
-    integer :: n_targets                                                        ! number of targets in the simulation
+    integer :: n_targets                                            ! number of targets in the simulation
+    integer :: n_targimplct                                         ! number of targets solved impicitly 
+	                                                                ! with DASSL
     type (target_type), allocatable, dimension(:), target  :: targetinfo        ! structured target data
 
     integer :: n_detectors                                                      ! number of detectors in the simulation
@@ -397,7 +399,7 @@ module solver_data
 
     use precision_parameters
     
-    use cparams, only: nt, maxteq, ns, mxrooms, mxdiscon
+    use cparams, only: nt, maxteq, ns, mxrooms, mxdiscon, mxtarg
     use defaults, only: default_stpmax  
     
     implicit none
@@ -429,12 +431,13 @@ module solver_data
     integer :: stpmin_cnt_max                   ! maximum number of time steps below stpmin before DASSL calls it quits
     
     ! solver variables
-    integer :: nofp, noftu, nofvu, noftl, nofoxyl, nofoxyu, nofwt, nofprd, nofhvpr, nequals
+    integer :: nofp, noftu, nofvu, noftl, nofoxyl, nofoxyu, nofwt, noftarg, nofprd, nofhvpr, nequals
     real(eb), dimension(maxteq) :: p, pold, pdold
     real(eb) :: told, dt
 
     integer, dimension(ns+2) :: i_speciesmap    ! maps species to corresponding DASSL equations
     integer, dimension(mxrooms,4) :: i_wallmap  ! maps wall surface temperatures to corresponding DASSL equations
+    integer, dimension(mxtarg,2) :: i_targmap   ! maps target surface temperatures to corresponding DASSL equations
     
     integer :: jaccol
     integer :: jacdim
